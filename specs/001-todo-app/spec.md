@@ -8,6 +8,17 @@
 
 **Input**: User description: "Personal TODO list (single user, web). The owner is the only user; they keep a simple list of things to do, reachable from any browser. US1 – Private access (P1): only the owner can see or change the list; anyone without the owner's credentials is refused. US2 – Add a TODO (P1): the owner types a short description and adds it; it appears in the list immediately as "pending". Empty/whitespace-only descriptions and descriptions longer than 200 characters are rejected. US3 – View the list (P1): the owner sees all items, newest first, each clearly showing whether it is pending or completed; an empty list shows a friendly empty-state message. US4 – Mark as completed (P2): the owner marks a pending item as completed and its status visibly changes; completion is one-way. Persistence: items survive page reloads, browser restarts, other devices, and new deployments. Out of scope: editing, deleting, un-completing, due dates, priorities, multiple users, filtering/search."
 
+## Clarifications
+
+### Session 2026-11-10
+
+- Q: Should the app do anything to slow down someone who keeps guessing the owner's
+  password? → A: No app-level throttling; require a strong (≥ 20-character random) owner
+  password and rely on the hosting platform's standard protections.
+- Q: If the list is open in two places at once, should changes made in one place appear
+  in the other automatically? → A: No automatic sync; each open copy shows the latest
+  data when the page is loaded or reloaded and after the owner's own add/complete actions.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Private access (Priority: P1)
@@ -147,6 +158,10 @@ confirming completed items offer no way to revert.
   error message, the list does not show a change that was not saved, and the owner can
   retry.
 - The application is redeployed: existing items and statuses are unaffected.
+- The list is open in two tabs or on two devices: a change made in one appears in the
+  other after that copy is reloaded or after its next add/complete action (see FR-014a).
+- Repeated failed sign-in attempts: each is refused in the same way as a single failed
+  attempt; there is no lockout (see FR-003a).
 
 ## Requirements *(mandatory)*
 
@@ -160,6 +175,10 @@ confirming completed items offer no way to revert.
   without valid owner credentials, without revealing whether any items exist.
 - **FR-003**: System MUST support exactly one user (the owner); the owner's credentials
   MUST be configurable by the operator without changing the application's code.
+- **FR-003a**: The owner password MUST be a randomly generated value of at least 20
+  characters. The application itself does not throttle or lock out repeated failed
+  attempts; protection against password guessing relies on password strength and the
+  hosting platform's standard protections.
 
 **Adding items**
 
@@ -186,6 +205,10 @@ confirming completed items offer no way to revert.
 - **FR-013**: System MUST show a friendly empty-state message when the owner has no items.
 - **FR-014**: System MUST display descriptions as literal text, never interpreting them
   as markup or executable content.
+- **FR-014a**: The list MUST show the latest stored data when the page is loaded or
+  reloaded and after each of the owner's own add/complete actions. Changes made in
+  another open copy of the application are NOT pushed automatically; no background
+  polling or live-update connection is required.
 
 **Completing items**
 
