@@ -1,0 +1,17 @@
+# Dependencies & build output
+node_modules/
+dist/
+.wrangler/
+coverage/
+
+# Local secrets / env (Wrangler reads .dev.vars for local Worker secrets)
+.dev.vars
+.env
+.env.*
+
+# Claude Code: keep shared skills/settings, ignore machine-local files
+.claude/settings.local.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
