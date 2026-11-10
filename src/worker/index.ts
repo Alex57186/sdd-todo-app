@@ -1,6 +1,8 @@
-// Single Worker: security headers → (auth, added in US1/T023) → /api/todos → static assets.
-// See plan.md "Request flow" and research R1, R2, R9.
+// Single Worker: security headers → Basic Auth → /api/todos → static assets.
+// See plan.md "Request flow" and research R1, R2, R3, R9.
 import { Hono } from "hono";
+import { basicAuth } from "hono/basic-auth";
+import { HTTPException } from "hono/http-exception";
 import { secureHeaders } from "hono/secure-headers";
 import type { Env } from "./env";
 import { todos } from "./todos";
@@ -19,6 +21,17 @@ app.use(
   }),
 );
 
+// US1 (FR-001 – FR-003a): every request — API and static assets alike (run_worker_first) —
+// needs the owner's credentials. Credentials are Worker secrets read per request.
+app.use("*", async (c, next) => {
+  const { AUTH_USERNAME: username, AUTH_PASSWORD: password } = c.env;
+  if (!username || !password) {
+    // T024: fail closed — a missing secret must never mean "no authentication".
+    throw new Error("Authentication is not configured");
+  }
+  return basicAuth({ username, password, realm: "TODO" })(c, next);
+});
+
 app.route("/api/todos", todos);
 
 // Any other /api/* path is a JSON 404 (never falls through to static assets).
@@ -35,6 +48,8 @@ app.all("*", async (c) => {
 });
 
 app.onError((err, c) => {
+  // Hono middleware (e.g. basicAuth → 401) signals responses by throwing HTTPException.
+  if (err instanceof HTTPException) return err.getResponse();
   // Never log request bodies, descriptions or credentials (research R13).
   console.error("Unhandled error:", err.name, err.message);
   return c.json<ApiError>(
