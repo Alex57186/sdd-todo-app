@@ -39,7 +39,13 @@ checked against the npm registry on 2026-11-10.
 - **Decision**: HTTP Basic Auth via Hono's built-in `basicAuth` middleware, applied to
   all routes. Credentials come from Worker secrets `AUTH_USERNAME` and `AUTH_PASSWORD`
   (local: `.dev.vars`, untracked). Unauthenticated responses are `401` with
-  `WWW-Authenticate: Basic realm="TODO", charset="UTF-8"` and a body that reveals no data.
+  `WWW-Authenticate: Basic realm="TODO"` and a body that reveals no data.
+- **Amendment 2026-11-10 (found during T022)**: the contract originally also required
+  `charset="UTF-8"`. Hono's `basicAuth` always emits `Basic realm="<realm>"` and escapes
+  quotes, so the parameter cannot be added without hand-written auth. `charset` only affects
+  non-ASCII credentials; FR-003a passwords are random ASCII. Dropped from the contract
+  rather than adding custom auth code (constitution II). Hono signals 401 by *throwing*
+  `HTTPException`, so `onError` must return `err.getResponse()` for those.
 - **Rationale**: Fixed by the constitution (IV). Browser shows a native credential
   prompt; no login page, session store, or cookies to build. Hono's middleware compares
   credentials using hashed, timing-safe comparison.
