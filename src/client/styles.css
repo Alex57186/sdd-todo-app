@@ -63,6 +63,10 @@ h1 {
   .todo--completed .todo__status {
     color: #3fb950;
   }
+
+  .error {
+    color: #ff7b72;
+  }
 }
 
 .empty,
