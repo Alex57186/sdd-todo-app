@@ -137,3 +137,18 @@ disabled`) — use `npx.cmd`.
 | `CLAUDE_CODE_OAUTH_TOKEN`         | GitHub Actions            | owner (`claude setup-token` → `gh secret set`)            |
 | `AUTH_USERNAME` / `AUTH_PASSWORD` | Cloudflare Worker secrets | owner (`npx.cmd wrangler secret put …`)                   |
 | local `AUTH_*`                    | `.dev.vars` (gitignored)  | developer                                                 |
+
+## Phase 6 — US3 View the list (TODO-7)
+
+- Red → green: 16 failing tests (7 API, 9 UI) → 53/53 after T033–T036.
+- **UI tests without a browser**: `render.ts` holds pure DOM functions; `main.ts` exports
+  `loadTodos(container, fetchFn = fetch)` so tests inject a fake `fetch` (`vi.fn`) — no
+  network mocking library needed. happy-dom provides `document`.
+- **XSS test that proves the rule**: rendering `<b>hi</b><img src=x onerror=…>` must create
+  no `<b>`/`<img>` elements — only possible because every user string goes through
+  `textContent`.
+- **Local D1 is keyed by `database_id`**: after T027 replaced the placeholder id, `wrangler dev`
+  used a brand-new empty local DB → `D1_ERROR: no such table: todos` (500). Tests didn't
+  catch it (they apply migrations themselves). Fix: `npm run dev` now runs
+  `wrangler d1 migrations apply todo-db --local` first.
+- Bulk seeding for the 500-item test: `env.DB.batch([...prepared statements])`.
