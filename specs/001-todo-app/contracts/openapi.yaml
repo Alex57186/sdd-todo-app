@@ -111,7 +111,7 @@ components:
   responses:
     Unauthorized:
       description: |
-        Missing or wrong credentials. Header `WWW-Authenticate: Basic realm="TODO", charset="UTF-8"`.
+        Missing or wrong credentials. Header `WWW-Authenticate: Basic realm="TODO"` (no `charset` parameter — see research R3).
         Body never reveals whether items exist (FR-002).
       headers:
         WWW-Authenticate:
