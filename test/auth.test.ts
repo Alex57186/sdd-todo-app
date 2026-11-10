@@ -3,6 +3,7 @@ import { createExecutionContext } from "cloudflare:test";
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 import app from "../src/worker/index";
+import type { TodoRow } from "../src/worker/todos";
 import { authHeaders, call, countTodos, resetDb, seedTodo } from "./helpers";
 
 const SECRET_ITEM = "Secret plan: buy milk";
@@ -16,7 +17,10 @@ const invalidCredentials: [string, Record<string, string>][] = [
   ["non-Basic scheme", { Authorization: `Bearer ${env.AUTH_PASSWORD}` }],
 ];
 
-/** Every operation that reads or changes TODO data, plus UI paths (FR-001, FR-002). */
+/**
+ * Every operation that reads or changes TODO data, plus UI paths (FR-001, FR-002).
+ * `:id` is replaced with the seeded item's real id (AUTOINCREMENT never reuses ids).
+ */
 const protectedRequests: [string, string, RequestInit?][] = [
   ["UI page", "/"],
   ["static asset", "/assets/app.js"],
@@ -30,7 +34,7 @@ const protectedRequests: [string, string, RequestInit?][] = [
       body: JSON.stringify({ description: "Injected" }),
     },
   ],
-  ["complete todo", "/api/todos/1/complete", { method: "POST" }],
+  ["complete todo", "/api/todos/:id/complete", { method: "POST" }],
 ];
 
 function withHeaders(init: RequestInit | undefined, headers: Record<string, string>): RequestInit {
@@ -38,23 +42,31 @@ function withHeaders(init: RequestInit | undefined, headers: Record<string, stri
 }
 
 describe("US1 — private access", () => {
+  let seeded: TodoRow;
+
   beforeEach(async () => {
     await resetDb();
-    await seedTodo({ description: SECRET_ITEM });
+    seeded = await seedTodo({ description: SECRET_ITEM });
   });
 
   describe.each(invalidCredentials)("with %s", (_label, headers) => {
     it.each(protectedRequests)(
       "refuses %s with 401, reveals nothing and changes nothing",
       async (_name, path, init) => {
-        const res = await call(path, withHeaders(init, headers));
+        const target = path.replace(":id", String(seeded.id));
+        const res = await call(target, withHeaders(init, headers));
         const body = await res.text();
 
         expect(res.status).toBe(401);
         expect(res.headers.get("WWW-Authenticate")).toBe('Basic realm="TODO"');
         expect(body).not.toContain(SECRET_ITEM);
         expect(body).not.toContain("<h1>");
+        // Nothing created, and the seeded item is untouched (still pending).
         expect(await countTodos()).toBe(1);
+        const after = await env.DB.prepare("SELECT * FROM todos WHERE id = ?1")
+          .bind(seeded.id)
+          .first<TodoRow>();
+        expect(after).toEqual(seeded);
       },
     );
   });
