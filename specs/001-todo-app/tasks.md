@@ -90,12 +90,12 @@ Single project at repository root: `src/worker/`, `src/shared/`, `src/client/`,
 
 ### Tests for User Story 1
 
-- [ ] T022 [P] [US1] Create `test/auth.test.ts` covering US1 scenarios 1–4: `GET /` without credentials → `401` with `WWW-Authenticate: Basic realm="TODO"` (research R3 amendment) and no app HTML in the body; wrong password → `401`; wrong username → `401`; correct credentials → `200` HTML; `GET /api/todos`, `POST /api/todos`, `POST /api/todos/1/complete` without credentials → `401` and row count in `todos` unchanged; a static asset path without credentials → `401`; repeated failed attempts each → `401` (no lockout, FR-003a)
+- [X] T022 [P] [US1] Create `test/auth.test.ts` covering US1 scenarios 1–4: `GET /` without credentials → `401` with `WWW-Authenticate: Basic realm="TODO"` (research R3 amendment) and no app HTML in the body; wrong password → `401`; wrong username → `401`; correct credentials → `200` HTML; `GET /api/todos`, `POST /api/todos`, `POST /api/todos/1/complete` without credentials → `401` and row count in `todos` unchanged; a static asset path without credentials → `401`; repeated failed attempts each → `401` (no lockout, FR-003a)
 
 ### Implementation for User Story 1
 
-- [ ] T023 [US1] Add Hono `basicAuth` middleware in `src/worker/index.ts` on all routes, after `secureHeaders` and before `/api` routes and the assets fallback; read `username`/`password` from `c.env.AUTH_USERNAME` / `c.env.AUTH_PASSWORD` per request; realm `TODO`; 401 body is a short plain-text message revealing no data
-- [ ] T024 [US1] Fail closed (FR-001): if `AUTH_USERNAME` or `AUTH_PASSWORD` is missing/empty, respond `500 INTERNAL_ERROR` for every request (never serve unauthenticated); add a test case for it in `test/auth.test.ts`
+- [X] T023 [US1] Add Hono `basicAuth` middleware in `src/worker/index.ts` on all routes, after `secureHeaders` and before `/api` routes and the assets fallback; read `username`/`password` from `c.env.AUTH_USERNAME` / `c.env.AUTH_PASSWORD` per request; realm `TODO`; 401 body is a short plain-text message revealing no data
+- [X] T024 [US1] Fail closed (FR-001): if `AUTH_USERNAME` or `AUTH_PASSWORD` is missing/empty, respond `500 INTERNAL_ERROR` for every request (never serve unauthenticated); add a test case for it in `test/auth.test.ts`
 
 **Checkpoint**: US1 is fully functional — the app shell is reachable only with valid credentials.
 

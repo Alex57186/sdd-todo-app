@@ -93,3 +93,19 @@ gh api -X PUT repos/Alex57186/sdd-todo-app/branches/main/protection --input - <<
 }
 JSON
 ```
+
+## Phase 4 — US1 Private access (TODO-5)
+
+- **Read the library before trusting the plan.** Hono's `basicAuth` (a) always sends
+  `WWW-Authenticate: Basic realm="…"` with no `charset`, and (b) signals 401 by _throwing_
+  an `HTTPException`. (a) contradicted our API contract → contract + research R3 amended
+  first (own commit). (b) meant our catch-all `onError` would have turned every 401 into a
+  500 → `onError` now returns `err.getResponse()` for `HTTPException`.
+- **Credentials per request**: `basicAuth` is built inside a middleware so it can read the
+  Worker secrets from `c.env` (secrets are not available at module load).
+- **Fail closed** (T024): empty `AUTH_USERNAME`/`AUTH_PASSWORD` → 500, never "open".
+  Tested by calling `app.fetch(req, { ...env, AUTH_PASSWORD: "" }, createExecutionContext())`.
+- **Table-driven tests**: 5 kinds of bad credentials × 5 protected requests = 25 cases from
+  ~20 lines (`describe.each` × `it.each`), each asserting 401 + challenge header + no data
+  leaked + no row changed — a direct translation of acceptance scenarios 1, 2 and 4.
+- Red → green: 29 failing tests before the middleware, 37/37 after.
