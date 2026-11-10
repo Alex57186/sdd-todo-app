@@ -1,0 +1,134 @@
+openapi: 3.1.0
+info:
+  title: Personal TODO List API
+  version: 1.0.0
+  description: |
+    HTTP API served by the single Cloudflare Worker under /api.
+    Spec: specs/001-todo-app/spec.md. Every operation requires HTTP Basic Auth
+    (FR-001, FR-002). Static UI files at "/" are protected by the same auth.
+servers:
+  - url: /
+security:
+  - basicAuth: []
+
+paths:
+  /api/todos:
+    get:
+      operationId: listTodos
+      summary: List all TODO items, newest first (FR-010, FR-011)
+      responses:
+        "200":
+          description: All items ordered by createdAt desc, id desc. Empty array when none.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Todo" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+    post:
+      operationId: createTodo
+      summary: Create a pending TODO item (FR-004 – FR-008)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [description]
+              properties:
+                description:
+                  type: string
+                  description: Trimmed server-side; 1–200 grapheme clusters after trimming.
+            examples:
+              ok: { value: { description: "Buy milk" } }
+      responses:
+        "201":
+          description: Created item (status always "pending").
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Todo" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/todos/{id}/complete:
+    post:
+      operationId: completeTodo
+      summary: Mark an item as completed — one-way and idempotent (FR-015, FR-017 – FR-019)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: |
+            The item in status "completed". If it was already completed, it is returned
+            unchanged (completedAt keeps its original value).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Todo" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    Todo:
+      type: object
+      required: [id, description, status, createdAt, completedAt]
+      properties:
+        id: { type: integer, example: 42 }
+        description: { type: string, example: "Buy milk" }
+        status: { type: string, enum: [pending, completed] }
+        createdAt: { type: string, format: date-time, example: "2026-11-10T09:15:02.123Z" }
+        completedAt:
+          type: [string, "null"]
+          format: date-time
+          description: null while pending.
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum: [VALIDATION_ERROR, NOT_FOUND, UNAUTHORIZED, INTERNAL_ERROR]
+            message: { type: string, description: Human-readable, safe to show in UI. }
+
+  responses:
+    Unauthorized:
+      description: |
+        Missing or wrong credentials. Header `WWW-Authenticate: Basic realm="TODO", charset="UTF-8"`.
+        Body never reveals whether items exist (FR-002).
+      headers:
+        WWW-Authenticate:
+          schema: { type: string }
+    ValidationError:
+      description: Invalid description; no item created (FR-006, FR-007).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          examples:
+            required:
+              value: { error: { code: VALIDATION_ERROR, message: "Description is required." } }
+            tooLong:
+              value: { error: { code: VALIDATION_ERROR, message: "Description must be 200 characters or fewer." } }
+    NotFound:
+      description: No item with this id (or id is not a positive integer); no data changed.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: { code: NOT_FOUND, message: "TODO item not found." } }
