@@ -20,8 +20,9 @@ concurrency:
 
 jobs:
   deploy:
+    # Manual runs may only deploy main; automatic runs only after CI passed for a push to main.
     if: >-
-      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
@@ -54,8 +55,16 @@ jobs:
 
       - name: Deploy Worker
         id: deploy
+        # Default `run` shell is `bash -e` WITHOUT pipefail: without it a failing
+        # `wrangler deploy | tee` would still look green.
+        shell: bash
         run: |
+          set -euo pipefail
           npx wrangler deploy | tee deploy.log
-          url=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          url=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -1 || true)
+          if [ -z "$url" ]; then
+            echo "::error::Deployed, but no *.workers.dev URL found in wrangler output"
+            exit 1
+          fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "Deployed to: $url" >> "$GITHUB_STEP_SUMMARY"
