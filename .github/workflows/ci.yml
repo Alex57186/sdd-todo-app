@@ -1,0 +1,46 @@
+# T018 — Quality gate for every PR and for main (constitution III + Development Workflow 5).
+# The job name `ci` is the required status check in branch protection.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Test (Workers runtime + local D1, happy-dom UI)
+        run: npm test
+
+      - name: Build (Vite + wrangler deploy --dry-run)
+        run: npm run build
