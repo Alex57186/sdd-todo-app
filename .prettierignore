@@ -1,0 +1,9 @@
+dist/
+.wrangler/
+coverage/
+node_modules/
+package-lock.json
+# Spec Kit artifacts and agent files are maintained by their own tools
+specs/
+.specify/
+.claude/
