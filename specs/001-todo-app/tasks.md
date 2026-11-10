@@ -105,11 +105,11 @@ Single project at repository root: `src/worker/`, `src/shared/`, `src/client/`,
 
 **Purpose**: First public deployment (now protected by US1) and automatic deploy on every merge to `main` (FR-020, SC-004).
 
-- [ ] T025 [manual] Create a Cloudflare API token with permissions *Workers Scripts: Edit* and *D1: Edit* (account-scoped); add GitHub Actions secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`
-- [ ] T026 [manual] Run `npx wrangler login` and `npx wrangler d1 create todo-db`; note the returned `database_id`
-- [ ] T027 Replace the placeholder `database_id` in `wrangler.jsonc` with the real id from T026 (not a secret)
+- [X] T025 [manual] Create a Cloudflare API token with permissions *Workers Scripts: Edit* and *D1: Edit* (account-scoped); add GitHub Actions secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`
+- [X] T026 [manual] Run `npx wrangler login` and `npx wrangler d1 create todo-db`; note the returned `database_id`
+- [X] T027 Replace the placeholder `database_id` in `wrangler.jsonc` with the real id from T026 (not a secret)
 - [ ] T028 [manual] Generate a password (`openssl rand -base64 30`) and set Worker secrets with `npx wrangler secret put AUTH_USERNAME` and `npx wrangler secret put AUTH_PASSWORD`; store the password in a password manager
-- [ ] T029 Create `.github/workflows/deploy.yml`: trigger `push` to `main` (and `workflow_dispatch`); `concurrency: deploy-production` without cancel-in-progress; Node 22; `npm ci` → `npm run build` → `npx wrangler d1 migrations apply todo-db --remote` → `npx wrangler deploy`; env `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` from secrets; GitHub `environment: production` with the deployed URL
+- [X] T029 Create `.github/workflows/deploy.yml`: trigger `workflow_run` on successful **CI** for pushes to `main` (and `workflow_dispatch`), checking out the CI-tested commit (research R12 amendment); `concurrency: deploy-production` without cancel-in-progress; Node 22; `npm ci` → `vite build` (not `npm run build`, which adds a dry-run deploy) → `npx wrangler d1 migrations apply todo-db --remote` → `npx wrangler deploy`; env `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` from secrets; GitHub `environment: production` with the deployed URL
 - [ ] T030 After merge, verify the public `*.workers.dev` URL with quickstart.md scenarios 1 and 2 (401 without / with wrong credentials) and a successful sign-in; record the URL in the PR and Jira issue
 
 **Checkpoint**: Merging to `main` deploys automatically; the public URL demands credentials.
