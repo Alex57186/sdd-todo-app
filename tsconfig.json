@@ -1,0 +1,21 @@
+{
+  // Worker runtime + shared code + Worker-pool tests.
+  // Browser code and DOM-based UI tests are type-checked by src/client/tsconfig.json.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "types": ["@cloudflare/workers-types", "@cloudflare/vitest-plugin/types"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/worker", "src/shared", "test", "vite.config.ts", "vitest.config.ts"],
+  "exclude": ["test/ui*.test.ts", "node_modules", "dist"]
+}

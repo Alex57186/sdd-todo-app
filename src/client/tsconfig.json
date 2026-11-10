@@ -1,0 +1,10 @@
+{
+  // Browser code + DOM-based UI tests (happy-dom). No Workers runtime types here.
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": []
+  },
+  "include": [".", "../shared", "../../test/ui*.test.ts"],
+  "exclude": []
+}
