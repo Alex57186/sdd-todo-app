@@ -97,7 +97,8 @@ src/
 │   └── types.ts          # Todo / ApiError types matching contracts/openapi.yaml
 └── client/
     ├── index.html        # Single page
-    ├── main.ts           # fetch API, render list, form + complete handlers
+    ├── main.ts           # entry: fetch API, wire form + complete handlers
+    ├── render.ts         # pure DOM-building functions (textContent only), unit-tested
     └── styles.css
 
 migrations/
