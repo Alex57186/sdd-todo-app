@@ -105,10 +105,16 @@ migrations/
 └── 0001_create_todos.sql
 
 test/
-├── api.test.ts           # Workers pool + local D1: create/list/complete, 400/404 cases
-├── auth.test.ts          # 401 on API and static assets, wrong creds, correct creds
-├── validation.test.ts    # trim, empty, 200/201, emoji/Cyrillic
-└── ui.test.ts            # happy-dom: empty state, literal text, labels, buttons, errors
+├── helpers.ts            # resetDb, seedTodo, authHeaders
+├── foundation.test.ts    # migrations applied, API 404, security headers
+├── auth.test.ts          # US1: 401 on API and static assets, wrong/correct creds, fail closed
+├── api.list.test.ts      # US3: Workers pool + local D1: ordering, shape, 500 items
+├── api.create.test.ts    # US2: 201/400 cases, no row on invalid input
+├── api.complete.test.ts  # US4: 200 idempotent, 404 cases, order unchanged
+├── validation.test.ts    # US2: trim, empty, 200/201, emoji/Cyrillic
+├── ui.list.test.ts       # US3 (happy-dom): empty state, literal text, status labels
+├── ui.add.test.ts        # US2 (happy-dom): add flow, disabled button, errors
+└── ui.complete.test.ts   # US4 (happy-dom): complete button, errors
 
 .github/
 ├── workflows/
@@ -152,6 +158,7 @@ Browser ──HTTPS──▶ Worker (run_worker_first)
 | `test` | `vitest run` |
 | `lint` | `eslint .` |
 | `format:check` | `prettier --check .` |
+| `format` | `prettier --write .` |
 | `typecheck` | `tsc --noEmit` |
 | `db:migrate:local` | `wrangler d1 migrations apply todo-db --local` |
 | `deploy` | `wrangler deploy` (CI only) |

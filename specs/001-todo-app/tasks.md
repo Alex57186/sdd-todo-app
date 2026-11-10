@@ -63,7 +63,7 @@ Single project at repository root: `src/worker/`, `src/shared/`, `src/client/`,
 - [ ] T014 Create `src/worker/index.ts`: Hono app with `secureHeaders` (CSP `default-src 'self'`, `frame-ancestors 'none'`, no inline scripts; `X-Content-Type-Options: nosniff`) on all routes; mount `todos` at `/api/todos`; any other `/api/*` → `404` `{"error":{"code":"NOT_FOUND",...}}`; `onError` → `500` `INTERNAL_ERROR` with `console.error` that never logs descriptions or credentials; all non-API requests → `c.env.ASSETS.fetch(c.req.raw)`
 - [ ] T015 [P] Create minimal UI shell: `src/client/index.html` (title "TODO", `<main id="app">`, loads `./main.ts` as module, links `./styles.css`, no inline script), `src/client/main.ts` (entry point, no behaviour yet), `src/client/render.ts` (empty module for pure, testable DOM-building functions), `src/client/styles.css` (readable system-font base, phone-width friendly)
 - [ ] T016 Create `test/helpers.ts`: `resetDb(env)` (deletes all rows from `todos`), `seedTodo(env, { description, status?, createdAt? })` for list/complete tests, and `authHeaders()` returning `Authorization: Basic` for the test credentials from T007
-- [ ] T017 Create `test/foundation.test.ts`: migrations applied (table `todos` exists); `GET /api/does-not-exist` → `404` JSON `NOT_FOUND`; responses carry the `Content-Security-Policy` header
+- [ ] T017 Create `test/foundation.test.ts`: migrations applied (table `todos` exists); `GET /api/does-not-exist` → `404` JSON `NOT_FOUND`; responses carry the `Content-Security-Policy` header. **All requests send `authHeaders()` from T016** so these tests keep passing once US1 (T023) adds authentication
 
 **Checkpoint**: `npm test` and `npm run build` pass; `npm run dev` serves the shell page locally.
 
@@ -95,7 +95,7 @@ Single project at repository root: `src/worker/`, `src/shared/`, `src/client/`,
 ### Implementation for User Story 1
 
 - [ ] T023 [US1] Add Hono `basicAuth` middleware in `src/worker/index.ts` on all routes, after `secureHeaders` and before `/api` routes and the assets fallback; read `username`/`password` from `c.env.AUTH_USERNAME` / `c.env.AUTH_PASSWORD` per request; realm `TODO`; 401 body is a short plain-text message revealing no data
-- [ ] T024 [US1] Fail closed: if `AUTH_USERNAME` or `AUTH_PASSWORD` is missing/empty, respond `500 INTERNAL_ERROR` for every request (never serve unauthenticated); add a test case for it in `test/auth.test.ts`
+- [ ] T024 [US1] Fail closed (FR-001): if `AUTH_USERNAME` or `AUTH_PASSWORD` is missing/empty, respond `500 INTERNAL_ERROR` for every request (never serve unauthenticated); add a test case for it in `test/auth.test.ts`
 
 **Checkpoint**: US1 is fully functional — the app shell is reachable only with valid credentials.
 
@@ -127,7 +127,7 @@ Single project at repository root: `src/worker/`, `src/shared/`, `src/client/`,
 
 ### Tests for User Story 3
 
-- [ ] T031 [P] [US3] Create `test/api.list.test.ts`: empty DB → `200 {"items":[]}`; seeded "A","B","C" → order C,B,A; two items with identical `created_at` ordered by `id DESC`; item shape exactly `{id, description, status, createdAt, completedAt}` per openapi; a completed item keeps its position (US3 scenarios 1–2, US4 scenario 6)
+- [ ] T031 [P] [US3] Create `test/api.list.test.ts`: empty DB → `200 {"items":[]}`; seeded "A","B","C" → order C,B,A; two items with identical `created_at` ordered by `id DESC`; item shape exactly `{id, description, status, createdAt, completedAt}` per openapi; a completed item keeps its position (US3 scenarios 1–2, US4 scenario 6); 500 seeded items are all returned (SC-007 volume; timing checked manually in T048)
 - [ ] T032 [P] [US3] Create `test/ui.list.test.ts` (happy-dom) for `src/client/render.ts`: empty list renders the empty-state message; items render in the given order; each item shows the text label "Pending" or "Completed" plus a ✓ symbol for completed (not colour alone, FR-012); description `<b>hi</b>` appears literally in `textContent` with no `<b>` element created (FR-014); a load failure renders an error message (FR-021)
 
 ### Implementation for User Story 3
@@ -240,6 +240,8 @@ each ship as a reviewed PR that auto-deploys on merge.
 3. Commits `type(<JIRA-KEY>): ...`; push; AI agent opens the PR (template filled).
 4. CI + AI review run; issue → **In Review**; findings addressed.
 5. Human approves and merges → deploy runs → issue → **Done**.
+6. Notable setup decisions, commands and gotchas from the phase are appended to
+   `docs/learning-guide.md` (constitution workflow item 7); T049 finalises it.
 
 ---
 
