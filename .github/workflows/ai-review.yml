@@ -1,0 +1,76 @@
+# T020 — AI-assisted code review with the Claude Code GitHub Action.
+# Reviews every PR against the constitution and the Spec Kit artifacts. It only comments:
+# it never approves, requests changes as a blocking review, pushes, or merges —
+# human approval remains required by branch protection (constitution, Workflow 5).
+name: AI Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # Skip drafts; forks have no access to secrets anyway.
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - name: Claude review
+        uses: anthropics/claude-code-action@v1
+        with:
+          # Whichever secret /install-github-app created; the other one is simply empty.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            You are the AI code reviewer for a Spec-Driven Development project.
+
+            ## Read first (source of truth)
+            - `.specify/memory/constitution.md` — non-negotiable principles I–V and quality gates
+            - `CLAUDE.md` — project conventions
+            - `specs/001-todo-app/spec.md`, `plan.md`, `data-model.md`, `contracts/openapi.yaml`
+            - `specs/001-todo-app/tasks.md` — the task IDs (T0xx) this PR claims to implement
+              (see the PR description and the Jira key in the title)
+
+            ## Review the PR diff for
+            1. **Spec compliance** — does the change implement exactly the referenced tasks and
+               FR/acceptance scenarios? Flag missing behaviour AND anything not specified
+               (scope creep; FR-022 lists forbidden features). Check the API matches
+               `contracts/openapi.yaml`.
+            2. **Correctness / bugs** — logic errors, edge cases from spec.md (trimming,
+               200 grapheme limit, idempotent completion, 404s), error handling.
+            3. **Security** (constitution IV) — every route behind auth (including static
+               assets), secrets never in code, parameterised SQL via `.bind()` only, user text
+               rendered with `textContent` (never `innerHTML`), no logging of descriptions or
+               credentials.
+            4. **Tests** (constitution III) — each acceptance scenario touched has an automated
+               test; Worker tests use the real local D1, not mocks.
+            5. **Simplicity & quality** (constitution II) — no unjustified dependencies or
+               speculative abstractions; readable, idiomatic TypeScript.
+            6. **Traceability** (constitution V) — Jira key in PR title and commit messages,
+               tasks ticked in tasks.md.
+
+            ## How to report
+            - Use inline comments for specific lines (mcp__github_inline_comment__create_inline_comment).
+            - Finish with ONE summary comment (`gh pr comment`) containing: a verdict line
+              ("✅ No blocking issues" or "⚠️ N issues to address"), a table of findings with
+              severity (blocker / should-fix / nit), and a short spec-compliance checklist.
+            - Be concise and concrete; do not praise or restate the diff.
+            - You must NOT approve, merge, push commits, or edit files.
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Glob,Grep"
