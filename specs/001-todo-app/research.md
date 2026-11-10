@@ -125,11 +125,16 @@ checked against the npm registry on 2026-11-10.
 ## R10. Testing strategy
 
 - **Decision**:
-  - **Vitest 4.1.x** (pinned: `@cloudflare/vitest-pool-workers` 0.23 requires
-    `vitest ^4.1.0`; Vitest 5 is not yet supported).
+  - **Vitest 4.1.x** (kept as originally planned; see the 2026-11-10 amendment below).
   - **API/integration tests** run inside the real Workers runtime via
-    `@cloudflare/vitest-pool-workers`, with a local D1 database and migrations applied
-    before tests — no DB mocks (constitution III).
+    **`@cloudflare/vitest-plugin`** (`cloudflareTest()` Vite plugin), with a local D1
+    database and migrations applied before tests — no DB mocks (constitution III).
+  - **Amendment 2026-11-10 (found during T002)**: `@cloudflare/vitest-pool-workers` is
+    deprecated — npm marks it "renamed to `@cloudflare/vitest-plugin`; will not receive
+    future updates". Same tool, new name and API (`cloudflareTest()`,
+    `readD1Migrations()`, `applyD1Migrations()`). Switched to `@cloudflare/vitest-plugin`
+    1.6.x, which supports `vitest ^4.1 || ^5`. Vitest stays on 4.1.x to keep the change
+    minimal; upgrading to 5 is now possible but out of scope.
   - **Validation unit tests** for `src/shared/validation.ts` (boundaries 200/201, emoji,
     trimming).
   - **UI tests** for the frontend render/interaction logic with Vitest + **happy-dom**
@@ -150,8 +155,8 @@ checked against the npm registry on 2026-11-10.
 | Hono | 4.13.x | |
 | Wrangler | 4.x (4.159) | dev dependency, never global |
 | Vite | 8.x | |
-| Vitest | 4.1.x | pinned by Workers pool peer dependency |
-| @cloudflare/vitest-pool-workers | 0.23.x | |
+| Vitest | 4.1.x | plugin supports 4.1 and 5; kept on 4.1 (R10 amendment) |
+| @cloudflare/vitest-plugin | 1.6.x | replaces deprecated `@cloudflare/vitest-pool-workers` |
 | happy-dom | latest | UI tests only |
 | ESLint + typescript-eslint | 10.x + 8.72.x | flat config |
 | Prettier | 3.x | format check in CI |

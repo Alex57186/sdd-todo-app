@@ -23,7 +23,7 @@ alternative.
 runtime (server) and modern browsers (client); Node.js ≥ 22.12 for tooling
 
 **Primary Dependencies**: Hono 4.13.x (runtime, only production dependency).
-Dev: Wrangler 4.x, Vite 8.x, Vitest 4.1.x, @cloudflare/vitest-pool-workers 0.23.x,
+Dev: Wrangler 4.x, Vite 8.x, Vitest 4.1.x, @cloudflare/vitest-plugin 1.6.x (research R10 amendment),
 happy-dom, ESLint 10 + typescript-eslint 8.72, Prettier 3, @cloudflare/workers-types
 
 **Storage**: Cloudflare D1 (`todo-db`, binding `DB`), schema via Wrangler migrations
