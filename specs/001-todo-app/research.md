@@ -174,8 +174,11 @@ Package manager: **npm** (lockfile `package-lock.json`, `npm ci` in CI).
 - **Decision**: Two GitHub Actions workflows:
   - `ci.yml` — on `pull_request` and `push` to `main`: `npm ci` → lint → format check →
     type-check → test → build.
-  - `deploy.yml` — on `push` to `main` (after merge): build → `wrangler d1 migrations
-    apply todo-db --remote` → `wrangler deploy`.
+  - `deploy.yml` — triggered by `workflow_run` when the **CI** workflow completes
+    **successfully** for a push to `main` (plus manual `workflow_dispatch`): build →
+    `wrangler d1 migrations apply todo-db --remote` → `wrangler deploy`. Amendment
+    2026-11-10 (T029): originally `on: push`, which would run deploy in parallel with CI
+    and could ship a commit whose tests fail; chaining guarantees "green CI → deploy".
   - A third workflow for **AI code review** (Claude Code GitHub Action) on pull requests —
     configured as part of delivery infrastructure, not app code.
 - **Secrets**:
