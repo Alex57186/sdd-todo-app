@@ -153,7 +153,7 @@ Browser ──HTTPS──▶ Worker (run_worker_first)
 
 | Script | Command |
 |--------|---------|
-| `dev` | `vite build && wrangler dev` |
+| `dev` | `vite build && wrangler d1 migrations apply todo-db --local && wrangler dev` (local D1 is keyed by `database_id`, so always migrate first) |
 | `build` | `vite build && wrangler deploy --dry-run --outdir dist/worker` |
 | `test` | `vitest run` (`pretest`: `vite build` — asset-serving tests need `dist/client`) |
 | `lint` | `eslint .` |

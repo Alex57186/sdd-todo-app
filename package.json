@@ -8,7 +8,7 @@
     "node": ">=22.12"
   },
   "scripts": {
-    "dev": "vite build && wrangler dev",
+    "dev": "vite build && wrangler d1 migrations apply todo-db --local && wrangler dev",
     "build": "vite build && wrangler deploy --dry-run --outdir dist/worker",
     "pretest": "vite build --logLevel warn",
     "test": "vitest run",

@@ -108,9 +108,9 @@ Single project at repository root: `src/worker/`, `src/shared/`, `src/client/`,
 - [X] T025 [manual] Create a Cloudflare API token with permissions *Workers Scripts: Edit* and *D1: Edit* (account-scoped); add GitHub Actions secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`
 - [X] T026 [manual] Run `npx wrangler login` and `npx wrangler d1 create todo-db`; note the returned `database_id`
 - [X] T027 Replace the placeholder `database_id` in `wrangler.jsonc` with the real id from T026 (not a secret)
-- [ ] T028 [manual] Generate a password (`openssl rand -base64 30`) and set Worker secrets with `npx wrangler secret put AUTH_USERNAME` and `npx wrangler secret put AUTH_PASSWORD`; store the password in a password manager
+- [X] T028 [manual] Generate a password (`openssl rand -base64 30`) and set Worker secrets with `npx wrangler secret put AUTH_USERNAME` and `npx wrangler secret put AUTH_PASSWORD`; store the password in a password manager
 - [X] T029 Create `.github/workflows/deploy.yml`: trigger `workflow_run` on successful **CI** for pushes to `main` (and `workflow_dispatch`), checking out the CI-tested commit (research R12 amendment); `concurrency: deploy-production` without cancel-in-progress; Node 22; `npm ci` → `vite build` (not `npm run build`, which adds a dry-run deploy) → `npx wrangler d1 migrations apply todo-db --remote` → `npx wrangler deploy`; env `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` from secrets; GitHub `environment: production` with the deployed URL
-- [ ] T030 After merge, verify the public `*.workers.dev` URL with quickstart.md scenarios 1 and 2 (401 without / with wrong credentials) and a successful sign-in; record the URL in the PR and Jira issue
+- [X] T030 After merge, verify the public `*.workers.dev` URL with quickstart.md scenarios 1 and 2 (401 without / with wrong credentials) and a successful sign-in; record the URL in the PR and Jira issue
 
 **Checkpoint**: Merging to `main` deploys automatically; the public URL demands credentials.
 
@@ -127,15 +127,15 @@ Single project at repository root: `src/worker/`, `src/shared/`, `src/client/`,
 
 ### Tests for User Story 3
 
-- [ ] T031 [P] [US3] Create `test/api.list.test.ts`: empty DB → `200 {"items":[]}`; seeded "A","B","C" → order C,B,A; two items with identical `created_at` ordered by `id DESC`; item shape exactly `{id, description, status, createdAt, completedAt}` per openapi; a completed item keeps its position (US3 scenarios 1–2, US4 scenario 6); 500 seeded items are all returned (SC-007 volume; timing checked manually in T048)
-- [ ] T032 [P] [US3] Create `test/ui.list.test.ts` (happy-dom) for `src/client/render.ts`: empty list renders the empty-state message; items render in the given order; each item shows the text label "Pending" or "Completed" plus a ✓ symbol for completed (not colour alone, FR-012); description `<b>hi</b>` appears literally in `textContent` with no `<b>` element created (FR-014); a load failure renders an error message (FR-021)
+- [X] T031 [P] [US3] Create `test/api.list.test.ts`: empty DB → `200 {"items":[]}`; seeded "A","B","C" → order C,B,A; two items with identical `created_at` ordered by `id DESC`; item shape exactly `{id, description, status, createdAt, completedAt}` per openapi; a completed item keeps its position (US3 scenarios 1–2, US4 scenario 6); 500 seeded items are all returned (SC-007 volume; timing checked manually in T048)
+- [X] T032 [P] [US3] Create `test/ui.list.test.ts` (happy-dom) for `src/client/render.ts`: empty list renders the empty-state message; items render in the given order; each item shows the text label "Pending" or "Completed" plus a ✓ symbol for completed (not colour alone, FR-012); description `<b>hi</b>` appears literally in `textContent` with no `<b>` element created (FR-014); a load failure renders an error message (FR-021)
 
 ### Implementation for User Story 3
 
-- [ ] T033 [US3] Implement `GET /api/todos` in `src/worker/todos.ts` with exactly `SELECT id, description, status, created_at, completed_at FROM todos ORDER BY created_at DESC, id DESC`, returning `{ items: Todo[] }`
-- [ ] T034 [US3] Implement `renderList(container, todos)` and `renderError(container, message)` in `src/client/render.ts` using only `document.createElement` and `textContent` (never `innerHTML` with data); empty-state text e.g. "Nothing to do yet — add your first item."
-- [ ] T035 [US3] In `src/client/main.ts`, on page load fetch `GET /api/todos` (same-origin, browser reuses Basic Auth) and render the list or an error; no polling or live updates (FR-014a)
-- [ ] T036 [P] [US3] Style statuses in `src/client/styles.css`: completed items struck through with muted text; status label always visible as text
+- [X] T033 [US3] Implement `GET /api/todos` in `src/worker/todos.ts` with exactly `SELECT id, description, status, created_at, completed_at FROM todos ORDER BY created_at DESC, id DESC`, returning `{ items: Todo[] }`
+- [X] T034 [US3] Implement `renderList(container, todos)` and `renderError(container, message)` in `src/client/render.ts` using only `document.createElement` and `textContent` (never `innerHTML` with data); empty-state text e.g. "Nothing to do yet — add your first item."
+- [X] T035 [US3] In `src/client/main.ts`, on page load fetch `GET /api/todos` (same-origin, browser reuses Basic Auth) and render the list or an error; no polling or live updates (FR-014a)
+- [X] T036 [P] [US3] Style statuses in `src/client/styles.css`: completed items struck through with muted text; status label always visible as text
 
 **Checkpoint**: US1 + US3 work — a signed-in owner sees seeded items correctly.
 

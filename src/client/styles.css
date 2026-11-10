@@ -23,3 +23,58 @@ h1 {
   font-size: 1.75rem;
   margin: 0.5rem 0 1rem;
 }
+
+/* T036 — US3 list. Status is always readable as text; colour and strike-through are extra cues (FR-012). */
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.todo {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+}
+
+.todo__status {
+  flex: 0 0 7.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.todo__text {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.todo--completed .todo__text {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.todo--completed .todo__status {
+  color: #1a7f37;
+}
+
+@media (prefers-color-scheme: dark) {
+  .todo--completed .todo__status {
+    color: #3fb950;
+  }
+
+  .error {
+    color: #ff7b72;
+  }
+}
+
+.empty,
+.loading {
+  opacity: 0.75;
+}
+
+.error {
+  color: #b42318;
+  font-weight: 600;
+}

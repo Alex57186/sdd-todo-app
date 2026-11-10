@@ -25,3 +25,11 @@ export function toTodo(row: TodoRow): Todo {
 }
 
 export const todos = new Hono<{ Bindings: Env }>();
+
+// T033 — US3: list all items, newest first (FR-010, FR-011; research R6 tie-breaker).
+todos.get("/", async (c) => {
+  const { results } = await c.env.DB.prepare(
+    "SELECT id, description, status, created_at, completed_at FROM todos ORDER BY created_at DESC, id DESC",
+  ).all<TodoRow>();
+  return c.json({ items: results.map(toTodo) });
+});
