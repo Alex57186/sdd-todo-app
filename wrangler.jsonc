@@ -1,0 +1,33 @@
+// Cloudflare Worker configuration — see specs/001-todo-app/plan.md and research.md (R1, R2, R5, R13).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "todo-app",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-11-01",
+
+  // D1 database (research R5). database_id is not a secret.
+  // Placeholder until T026/T027 create the real database with `wrangler d1 create todo-db`.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "todo-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
+
+  // Static frontend built by Vite (research R1). run_worker_first makes EVERY request,
+  // including index.html/JS/CSS, pass through the Worker's auth middleware (research R2, FR-001).
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+  },
+
+  // Built-in Workers logs (research R13).
+  "observability": {
+    "enabled": true,
+  },
+
+  // AUTH_USERNAME / AUTH_PASSWORD are Worker secrets (`wrangler secret put`), never listed here.
+}
