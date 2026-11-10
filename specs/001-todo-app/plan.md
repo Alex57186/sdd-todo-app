@@ -155,7 +155,7 @@ Browser ──HTTPS──▶ Worker (run_worker_first)
 |--------|---------|
 | `dev` | `vite build && wrangler dev` |
 | `build` | `vite build && wrangler deploy --dry-run --outdir dist/worker` |
-| `test` | `vitest run` |
+| `test` | `vitest run` (`pretest`: `vite build` — asset-serving tests need `dist/client`) |
 | `lint` | `eslint .` |
 | `format:check` | `prettier --check .` |
 | `format` | `prettier --write .` |

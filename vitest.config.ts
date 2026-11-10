@@ -26,6 +26,7 @@ export default defineConfig({
           name: "worker",
           include: ["test/**/*.test.ts"],
           exclude: ["test/ui*.test.ts"],
+          setupFiles: ["./test/apply-migrations.ts"],
         },
       },
       {
