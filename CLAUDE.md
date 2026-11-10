@@ -53,7 +53,8 @@ All of lint, format:check, typecheck, test and build must pass before opening a 
 - Tick completed tasks (`- [X]`) in `tasks.md` in the same PR.
 - Jira status: In Progress when the branch is created, In Review when the PR is opened,
   Done after merge. Jira site: https://papilaualiaksandr.atlassian.net, project `TODO`.
-- Never merge PRs and never push to `main`; a human approves every merge.
+- Never approve or merge PRs and never push to `main` (branch protection enforces PR + green
+  `ci`); only a human merges — that merge is the human approval (constitution v1.0.1).
 
 ## Rules of thumb
 
