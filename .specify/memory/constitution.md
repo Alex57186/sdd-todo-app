@@ -99,8 +99,12 @@ Changing any item above requires a constitution amendment.
    - pass CI (lint, type-check, test, build);
    - receive an automated AI code review covering correctness, security, code quality,
      and compliance with the spec and this constitution;
-   - receive at least one **human approval** before merge. AI review never substitutes
-     for human approval.
+   - be **merged by a human** after reviewing the diff, CI and the AI review. AI agents
+     MUST NOT approve or merge PRs, and AI review never substitutes for the human decision.
+     The human merge is the approval: the agent opens PRs under the owner's GitHub account
+     and GitHub forbids approving one's own PR, so `main` protection requires a PR, a green
+     `ci` check and resolved conversations rather than a formal approving review. If the
+     agent gets its own GitHub account, ≥ 1 approving review MUST be required instead.
 6. **Deployment**: merging to `main` triggers automatic deployment (including D1
    migrations) to Cloudflare Workers via GitHub Actions.
 7. **Documentation**: setup and workflow knowledge is captured under `docs/` as it is
@@ -121,4 +125,4 @@ Changing any item above requires a constitution amendment.
 - Runtime guidance for AI agents lives in `CLAUDE.md` and MUST stay consistent with
   this constitution.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-10 | **Last Amended**: 2026-11-10
+**Version**: 1.0.1 | **Ratified**: 2026-11-10 | **Last Amended**: 2026-11-10

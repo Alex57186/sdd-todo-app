@@ -61,3 +61,35 @@ runs in the browser (DOM lib). One tsconfig cannot describe both correctly, so:
 
 Lesson: a spec-driven task list can still miss an integration path — always run the real
 thing once per phase (quickstart.md exists for exactly this).
+
+## Phase 3 — CI & AI review (TODO-4)
+
+- First CI run passed in ~1 minute on `ubuntu-latest`: the Workers-runtime tests run on
+  Linux exactly as on Windows (workerd ships per-platform binaries).
+- AI Review failed with "Claude Code is not installed on this repository": the action needs
+  **both** the Claude GitHub App installed on the repo (https://github.com/apps/claude) **and**
+  a `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`) or `ANTHROPIC_API_KEY` secret.
+- claude-code-action will not run on a PR that modifies its own workflow file (it must match
+  the default branch), so the PR that adds the review workflow can never be AI-reviewed.
+- **Self-approval problem**: the agent opens PRs with the owner's `gh` login, and GitHub does
+  not allow approving your own PR. "Require 1 approval" would block every merge (or force an
+  admin bypass). Chosen fix (constitution v1.0.1, PATCH): 0 required approvals, PR + strict
+  `ci` check + resolved conversations + `enforce_admins`; the human merge is the approval and
+  the agent never merges. Real teams: give the agent its own GitHub account and require ≥ 1
+  approving review.
+
+Branch protection applied with:
+
+```bash
+gh api -X PUT repos/Alex57186/sdd-todo-app/branches/main/protection --input - <<'JSON'
+{
+  "required_status_checks": { "strict": true, "checks": [{ "context": "ci" }] },
+  "enforce_admins": true,
+  "required_pull_request_reviews": { "required_approving_review_count": 0 },
+  "restrictions": null,
+  "required_conversation_resolution": true,
+  "allow_force_pushes": false,
+  "allow_deletions": false
+}
+JSON
+```
