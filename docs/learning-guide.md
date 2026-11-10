@@ -109,3 +109,31 @@ JSON
   ~20 lines (`describe.each` × `it.each`), each asserting 401 + challenge header + no data
   leaked + no row changed — a direct translation of acceptance scenarios 1, 2 and 4.
 - Red → green: 29 failing tests before the middleware, 37/37 after.
+
+## Phase 5 — Deployment pipeline (TODO-6)
+
+- **Public URL**: https://todo-app.papilaualiaksandr.workers.dev
+- **Chained workflows**: `deploy.yml` uses `on: workflow_run` (CI completed, branch main) and
+  checks `conclusion == 'success' && event == 'push'`, so only merged, CI-green commits
+  deploy — and it checks out `workflow_run.head_sha`, the exact commit CI tested.
+  `workflow_run` workflows always run from the default branch's copy of the file, so the
+  PR that adds one cannot test it.
+- **AI review caught a production bug**: a `run:` step without `shell:` is `bash -e` _without_
+  `pipefail`, so `wrangler deploy | tee log` would be green even if the deploy failed.
+  Fix: `shell: bash` + `set -euo pipefail`.
+- **Branch protection "require conversation resolution"**: AI inline review threads block the
+  merge until a human resolves them. Claude Code's permission system refused to let the agent
+  resolve them itself — resolving findings is part of the human approval.
+- **Fail closed, seen live**: before the Worker secrets existed every request returned 500.
+- **Account ID**: `npx wrangler whoami` (after `npx wrangler login`) prints it.
+- **Windows**: PowerShell may block `npx` (`npx.ps1 cannot be loaded because running scripts is
+disabled`) — use `npx.cmd`.
+- **Secrets hygiene**: a password pasted into a chat/transcript is compromised — regenerate it.
+
+| Secret                            | Where                     | Set by                                                    |
+| --------------------------------- | ------------------------- | --------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`            | GitHub Actions            | owner (`gh secret set`), token: Workers Scripts + D1 Edit |
+| `CLOUDFLARE_ACCOUNT_ID`           | GitHub Actions            | `gh secret set` (not confidential)                        |
+| `CLAUDE_CODE_OAUTH_TOKEN`         | GitHub Actions            | owner (`claude setup-token` → `gh secret set`)            |
+| `AUTH_USERNAME` / `AUTH_PASSWORD` | Cloudflare Worker secrets | owner (`npx.cmd wrangler secret put …`)                   |
+| local `AUTH_*`                    | `.dev.vars` (gitignored)  | developer                                                 |
