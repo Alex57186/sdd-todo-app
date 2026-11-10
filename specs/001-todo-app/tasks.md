@@ -247,19 +247,19 @@ each ship as a reviewed PR that auto-deploys on merge.
 
 ## Jira Mapping
 
-Epic: **Personal TODO List (001-todo-app)**. Keys are filled in when issues are created.
+Epic: **[TODO-1](https://papilaualiaksandr.atlassian.net/browse/TODO-1) Personal TODO List (001-todo-app)**. Phase issues are children of the epic and linked in order with "blocks".
 
 | Phase | Jira type | Summary | Tasks | Key |
 |-------|-----------|---------|-------|-----|
-| 1 | Task | Project setup & tooling | T001–T009 | TBD |
-| 2 | Task | Foundation: schema, Worker skeleton, test harness | T010–T017 | TBD |
-| 3 | Task | CI pipeline, AI code review, branch protection | T018–T021 | TBD |
-| 4 | Story | US1 — Private access | T022–T024 | TBD |
-| 5 | Task | Deployment pipeline & first deploy | T025–T030 | TBD |
-| 6 | Story | US3 — View the list | T031–T036 | TBD |
-| 7 | Story | US2 — Add a TODO | T037–T042 | TBD |
-| 8 | Story | US4 — Mark as completed | T043–T046 | TBD |
-| 9 | Task | Polish, quickstart validation & learning guide | T047–T049 | TBD |
+| 1 | Task | Project setup & tooling | T001–T009 | [TODO-2](https://papilaualiaksandr.atlassian.net/browse/TODO-2) |
+| 2 | Task | Foundation: schema, Worker skeleton, test harness | T010–T017 | [TODO-3](https://papilaualiaksandr.atlassian.net/browse/TODO-3) |
+| 3 | Task | CI pipeline, AI code review, branch protection | T018–T021 | [TODO-4](https://papilaualiaksandr.atlassian.net/browse/TODO-4) |
+| 4 | Story | US1 — Private access | T022–T024 | [TODO-5](https://papilaualiaksandr.atlassian.net/browse/TODO-5) |
+| 5 | Task | Deployment pipeline & first deploy | T025–T030 | [TODO-6](https://papilaualiaksandr.atlassian.net/browse/TODO-6) |
+| 6 | Story | US3 — View the list | T031–T036 | [TODO-7](https://papilaualiaksandr.atlassian.net/browse/TODO-7) |
+| 7 | Story | US2 — Add a TODO | T037–T042 | [TODO-8](https://papilaualiaksandr.atlassian.net/browse/TODO-8) |
+| 8 | Story | US4 — Mark as completed | T043–T046 | [TODO-9](https://papilaualiaksandr.atlassian.net/browse/TODO-9) |
+| 9 | Task | Polish, quickstart validation & learning guide | T047–T049 | [TODO-10](https://papilaualiaksandr.atlassian.net/browse/TODO-10) |
 
 ---
 
