@@ -6,12 +6,12 @@
   "compatibility_date": "2026-11-01",
 
   // D1 database (research R5). database_id is not a secret.
-  // Placeholder until T026/T027 create the real database with `wrangler d1 create todo-db`.
+  // Created with `npx wrangler d1 create todo-db` (T026).
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "todo-db",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "c25f9ef8-8733-41ec-af03-a3e48c823704",
       "migrations_dir": "migrations",
     },
   ],
